@@ -1,7 +1,9 @@
+import wandb 
 import argparse, os, sys, datetime
 from omegaconf import OmegaConf
 from transformers import logging as transf_logging
 import pytorch_lightning as pl
+
 from pytorch_lightning import seed_everything
 from pytorch_lightning.trainer import Trainer
 import torch
@@ -62,6 +64,9 @@ if __name__ == "__main__":
     workdir, ckptdir, cfgdir, loginfo = init_workspace(args.name, args.logdir, config, lightning_config, global_rank)
     logger = set_logger(logfile=os.path.join(loginfo, 'log_%d:%s.txt'%(global_rank, now)))
     logger.info("@lightning version: %s [>=1.8 required]"%(pl.__version__))  
+    wandb.init(project='metaworld', sync_tensorboard=True)
+
+
 
     ## MODEL CONFIG >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     logger.info("***** Configing Model *****")

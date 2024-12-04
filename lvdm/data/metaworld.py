@@ -9,9 +9,12 @@ import random
 METAWORLD_DESCIPTION ={
     "reach": "Move the robot end-effector to a specific target position in space.",
     "push": "Push an object to a designated target location on a flat surface.",
-    "pick_place": "Pick up an object and place it at a specific target position.",
-    "door_open": "Open a hinged door by gripping and pulling or pushing it.",
-    "drawer_open": "Open a drawer by pulling it outward.",
+    "pick-place-wall": "Pick up an object and place it at a specific target position. Remember the wall",
+    "door-open": "Open a hinged door by gripping and pulling or pushing it.",
+    "door-lock": "Lock a hinged door by gripping .",
+    "door-unlock": "Unlock a hinged door by gripping .",
+    "drawer-open": "Open a drawer by pulling it outward.",
+    "drawer": "Push a drawer back into its closed position.",
     "drawer_close": "Push a drawer back into its closed position.",
     "button_press": "Press a button by moving the robot’s end-effector onto it.",
     "button_press_topdown": "Press a button positioned on a surface, with a top-down motion.",
@@ -21,11 +24,10 @@ METAWORLD_DESCIPTION ={
     "sweep_into_goal": "Sweep an object into a specific target area or goal.",
     "window_open": "Open a sliding window by gripping and pulling it.",
     "window_close": "Close a sliding window by pushing it back into place.",
-    "lever_pull": "Pull a lever to a specific position.",
+    "lever-pull": "Pull a lever to a specific position.",
     "handle_press_side": "Press a handle to the side using lateral force.",
     "handle_press_topdown": "Push a vertical handle downward.",
-    "stick_pull": "Pull a stick or lever out of its socket.",
-    "stick_push": "Push a stick or lever into its socket.",
+    "stick-push": "Push a stick or lever into its socket.",
     "basketball": "Pick up a ball and place it into a basketball hoop.",
     "coffee_button": "Press a button on a coffee machine.",
     "coffee_push": "Push a lever or button on a coffee machine.",
@@ -46,7 +48,7 @@ METAWORLD_DESCIPTION ={
     "faucet_open": "Rotate a faucet handle to turn it on.",
     "faucet_close": "Rotate a faucet handle to turn it off.",
     "hammer": "Use a hammer to strike a nail into a designated area.",
-    "nut_assembly": "Assemble a nut onto a bolt using the robot gripper.",
+    "assembly": "Assemble cicle with bar onto a stick using the robot gripper.",
     "push_back": "Push an object backward into a target area.",
     "pick_place_wall": "Pick up an object and place it at a target location behind a wall.",
     "shelf_remove": "Remove an object from a shelf and place it in a designated area.",
@@ -66,15 +68,13 @@ class MetaWorld(Dataset):
                  resolution = [256,256],
                  ):
         self.path = path
-        lang = np.load(lang_path,allow_pickle=True).reshape(-1)[0]
 
         self.videos = []
         self.init_fps = 30
         self.video_length = video_length
         self.h = resolution[0]
         self.w = resolution[1]
-        print(len(self.task_description))
-
+        self.get_data()
 
     def get_videos(self, path, task):
         """
@@ -94,16 +94,21 @@ class MetaWorld(Dataset):
                 view_path = os.path.join(ep_path, view) 
                 images = os.listdir(view_path)
                 stride = len(images) // self.video_length
+
                 images = sorted(images)
-                self.videos.append({'paths': images[::stride], 'caption': METAWORLD_DESCIPTION[task], 'stride': stride})
+                images = [os.path.join(view_path, image) for image in images]
+                # print(images)
+                
+                self.videos.append({'paths': images[::stride][:self.video_length], 'caption': METAWORLD_DESCIPTION[task.split('-v')[0]], 'stride': stride})
                 
 
-    def get_data(self, path):
+    def get_data(self):
         """
             task_name 
             video_path(use path to figure out )
         """
         self.task_name = os.listdir(self.path)
+        # self.task_name = [t.split('-')[0] for t in self.task_name]
         for task in self.task_name:
             task_path = os.path.join(self.path, task)
             self.get_videos(task_path, task)
@@ -137,4 +142,5 @@ class MetaWorld(Dataset):
         return data
 
 if __name__ == '__main__':
-    dataset = MetaWorld('/root/DynamiCrafter/data/MetaWorld')
+    dataset = MetaWorld('/root/DynamiCrafter/data/rendered_images')
+    print(len(dataset))

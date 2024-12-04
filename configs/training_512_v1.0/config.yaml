@@ -112,20 +112,15 @@ model:
 data:
   target: utils_data.DataModuleFromConfig
   params:
-    batch_size: 2
+    batch_size: 1
     num_workers: 12
     wrap: false
     train:
-      target: lvdm.data.webvid.WebVid
+      target: lvdm.data.metaworld.MetaWorld
       params:
-        data_dir: <WebVid10M DATA>
-        meta_path: <.csv FILE>
+        path: '/root/DynamiCrafter/data/rendered_images'
         video_length: 16
-        frame_stride: 6
-        load_raw_resolution: true
         resolution: [320, 512]
-        spatial_transform: resize_center_crop
-        random_fs: true  ## if true, we uniformly sample fs with max_fs=frame_stride (above)
 
 lightning:
   precision: 16
